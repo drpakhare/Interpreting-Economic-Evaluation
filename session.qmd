@@ -1,0 +1,1009 @@
+---
+title: "Interpretation of Economic Evaluation Results in HTA"
+subtitle: "Interactive Session for Community Medicine Residents"
+author: "RRC-HTA, AIIMS Bhopal"
+date: today
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+---
+
+## Welcome {.unnumbered}
+
+This interactive session will help you interpret economic evaluation results and make evidence-based policy decisions.
+
+**Learning Objectives:**
+
+1. Interpret ICER values and cost-effectiveness planes
+2. Understand probabilistic sensitivity analysis results
+3. Apply WTP thresholds to make reimbursement decisions
+4. Identify key drivers of uncertainty using tornado diagrams
+5. Interpret EVPI to judge research value
+6. Assess budget impact and affordability
+7. Identify common interpretation pitfalls
+
+::: {.callout-tip}
+## Quick Poll
+Before we begin, what's your biggest challenge with economic evaluations?
+
+- Understanding ICER calculations
+- Interpreting uncertainty
+- Applying thresholds
+- Translating to policy decisions
+:::
+
+::: {.callout-note}
+## Quick Recap: Key Concepts
+
+These concepts are covered in detail by the earlier workshop sessions. A brief recap for context:
+
+**QALY** (Quality-Adjusted Life Year) — One year of life in perfect health = 1 QALY. It captures both length and quality of life. For example, living 2 years at a utility of 0.7 = 1.4 QALYs. Utility weights typically come from patient-reported instruments such as EQ-5D.
+
+**WTP Threshold** (Willingness-to-Pay) — The maximum amount a health system is willing to pay per QALY gained. It reflects opportunity cost: the health that could have been produced elsewhere with the same resources. India commonly uses approximately ₹2,50,000 per QALY (~1× GDP per capita).
+
+**PSA** (Probabilistic Sensitivity Analysis) — Runs the economic model thousands of times, each time drawing parameter values from their uncertainty distributions, to show the full range of plausible results rather than relying on a single point estimate.
+:::
+
+## Part 1: Understanding ICER Basics
+
+The **Incremental Cost-Effectiveness Ratio (ICER)** tells us the additional cost per additional unit of health benefit.
+
+\[
+\text{ICER} = \frac{\text{Cost}_{\text{New}} - \text{Cost}_{\text{Standard}}}{\text{Effect}_{\text{New}} - \text{Effect}_{\text{Standard}}}
+\]
+
+### Interactive ICER Calculator
+
+```{ojs}
+//| panel: sidebar
+
+viewof cost_new = Inputs.range(
+  [0, 1000000],
+  {value: 200000, step: 5000, label: "Cost of New Treatment (₹):"}
+)
+
+viewof cost_std = Inputs.range(
+  [0, 1000000],
+  {value: 100000, step: 5000, label: "Cost of Standard Treatment (₹):"}
+)
+
+viewof qaly_new = Inputs.range(
+  [0, 20],
+  {value: 8, step: 0.1, label: "QALYs with New Treatment:"}
+)
+
+viewof qaly_std = Inputs.range(
+  [0, 20],
+  {value: 5, step: 0.1, label: "QALYs with Standard Treatment:"}
+)
+
+viewof wtp_threshold = Inputs.range(
+  [10000, 500000],
+  {value: 150000, step: 10000, label: "WTP Threshold (₹/QALY):"}
+)
+```
+
+```{ojs}
+//| panel: fill
+
+// Calculate ICER with all scenarios
+incremental_cost = cost_new - cost_std
+incremental_qaly = qaly_new - qaly_std
+
+// Determine quadrant
+quadrant = {
+  if (incremental_cost > 0 && incremental_qaly > 0) return "North-East";
+  if (incremental_cost > 0 && incremental_qaly < 0) return "North-West";
+  if (incremental_cost < 0 && incremental_qaly > 0) return "South-East";
+  if (incremental_cost < 0 && incremental_qaly < 0) return "South-West";
+  if (incremental_cost === 0 && incremental_qaly === 0) return "Origin";
+  if (incremental_cost === 0) return "Vertical";
+  if (incremental_qaly === 0) return "Horizontal";
+}
+
+// Calculate ICER with proper handling
+icer_value = incremental_qaly !== 0 ? incremental_cost / incremental_qaly : null
+
+// Interpretation logic
+interpretation = {
+  // Dominant (SE quadrant)
+  if (incremental_cost < 0 && incremental_qaly > 0) {
+    return {
+      status: "Dominant ✓✓",
+      color: "darkgreen",
+      decision: "Favours adoption",
+      explanation: "Less costly AND more effective"
+    };
+  }
+
+  // Dominated (NW quadrant)
+  if (incremental_cost > 0 && incremental_qaly < 0) {
+    return {
+      status: "Dominated ✗✗",
+      color: "darkred",
+      decision: "Favours rejection",
+      explanation: "More costly AND less effective"
+    };
+  }
+
+  // SW quadrant - saves money but loses health
+  if (incremental_cost < 0 && incremental_qaly < 0) {
+    const abs_icer = Math.abs(icer_value);
+    const is_acceptable = abs_icer < wtp_threshold;
+    return {
+      status: is_acceptable ? "Acceptable (trade-off)" : "Not acceptable",
+      color: is_acceptable ? "darkorange" : "red",
+      decision: is_acceptable ? "May adopt (saves money)" : "Reject (health loss too great)",
+      explanation: `Saves ₹${Math.abs(incremental_cost).toLocaleString('en-IN')} but loses ${Math.abs(incremental_qaly).toFixed(2)} QALYs. Society willing to pay ${(abs_icer).toLocaleString('en-IN', {maximumFractionDigits: 0})} per QALY foregone.`
+    };
+  }
+
+  // NE quadrant - standard ICER comparison
+  if (incremental_cost > 0 && incremental_qaly > 0) {
+    const is_ce = icer_value < wtp_threshold;
+    return {
+      status: is_ce ? "Cost-Effective ✓" : "Not Cost-Effective ✗",
+      color: is_ce ? "green" : "red",
+      decision: is_ce ? "Recommend adoption" : "Do not recommend",
+      explanation: `ICER ${is_ce ? 'below' : 'exceeds'} threshold`
+    };
+  }
+
+  // Edge cases
+  if (incremental_cost === 0 && incremental_qaly === 0) {
+    return {
+      status: "Identical",
+      color: "gray",
+      decision: "Indifferent",
+      explanation: "No difference in costs or effects"
+    };
+  }
+
+  if (incremental_qaly === 0) {
+    return {
+      status: incremental_cost > 0 ? "More costly, same effect" : "Less costly, same effect",
+      color: incremental_cost > 0 ? "red" : "green",
+      decision: incremental_cost > 0 ? "Reject" : "Adopt",
+      explanation: "No health benefit difference"
+    };
+  }
+
+  if (incremental_cost === 0) {
+    return {
+      status: incremental_qaly > 0 ? "Same cost, more effective" : "Same cost, less effective",
+      color: incremental_qaly > 0 ? "green" : "red",
+      decision: incremental_qaly > 0 ? "Adopt" : "Reject",
+      explanation: "No cost difference"
+    };
+  }
+}
+
+html`
+<div style="padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+  <h3>Results</h3>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+    <tr>
+      <td style="padding: 8px; border: 1px solid #dee2e6; background-color: #e9ecef;"><strong>Incremental Cost:</strong></td>
+      <td style="padding: 8px; border: 1px solid #dee2e6;">₹${incremental_cost.toLocaleString('en-IN')}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border: 1px solid #dee2e6; background-color: #e9ecef;"><strong>Incremental QALYs:</strong></td>
+      <td style="padding: 8px; border: 1px solid #dee2e6;">${incremental_qaly.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border: 1px solid #dee2e6; background-color: #e9ecef;"><strong>CE Plane Quadrant:</strong></td>
+      <td style="padding: 8px; border: 1px solid #dee2e6;">${quadrant}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border: 1px solid #dee2e6; background-color: #e9ecef;"><strong>ICER:</strong></td>
+      <td style="padding: 8px; border: 1px solid #dee2e6;">
+        ${icer_value !== null ? 
+          '₹' + icer_value.toLocaleString('en-IN', {maximumFractionDigits: 0}) + '/QALY' : 
+          'Undefined (no QALY change)'}
+      </td>
+    </tr>
+  </table>
+
+  <div style="padding: 15px; background-color: white; border-left: 4px solid ${interpretation.color}; border-radius: 4px;">
+    <p style="font-size: 20px; font-weight: bold; color: ${interpretation.color}; margin: 0 0 10px 0;">
+      ${interpretation.status}
+    </p>
+    <p style="margin: 5px 0;"><strong>Decision:</strong> ${interpretation.decision}</p>
+    <p style="margin: 5px 0; font-style: italic;">${interpretation.explanation}</p>
+    <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+      WTP threshold: ₹${wtp_threshold.toLocaleString('en-IN')}/QALY
+    </p>
+  </div>
+</div>
+`
+```
+
+::: {.callout-note}
+## Interpretation Guide
+
+### Four Quadrants of CE Plane
+
+**North-East (NE)**: More costly, more effective
+- Calculate ICER and compare to threshold
+- Most common scenario in HTA
+
+**South-East (SE)**: Less costly, more effective
+- **Dominant** — favours adoption
+- Best case scenario
+
+**North-West (NW)**: More costly, less effective
+- **Dominated** — favours rejection
+- Worst case scenario
+
+**South-West (SW)**: Less costly, less effective
+- Calculate savings per QALY lost
+- Adopt if society values saved resources more than health foregone
+
+### Common Thresholds
+- **India**: ~₹2,50,000 per QALY (~1× GDP per capita; used in HTAIn analyses)
+- **WHO (older benchmark)**: 1–3× GDP per capita
+:::
+
+### Try Different Scenarios
+
+**Example 1 - Dominant:** 
+- New: ₹150,000, 8 QALYs
+- Standard: ₹200,000, 6 QALYs
+
+**Example 2 - Dominated:**
+- New: ₹300,000, 5 QALYs
+- Standard: ₹200,000, 7 QALYs
+
+**Example 3 - NE Quadrant:**
+- New: ₹250,000, 9 QALYs
+- Standard: ₹150,000, 7 QALYs
+
+**Example 4 - SW Quadrant:**
+- New: ₹100,000, 7 QALYs
+- Standard: ₹180,000, 8.5 QALYs
+
+## Part 2: Cost-Effectiveness Plane
+
+The CE plane helps visualize where an intervention falls relative to standard care and shows uncertainty from probabilistic sensitivity analysis.
+
+```{ojs}
+//| panel: sidebar
+
+viewof psa_points = Inputs.range(
+  [100, 2000],
+  {value: 500, step: 100, label: "PSA Simulations:"}
+)
+
+viewof mean_inc_cost = Inputs.range(
+  [-200000, 300000],
+  {value: 100000, step: 10000, label: "Mean Incremental Cost (₹):"}
+)
+
+viewof mean_inc_qaly = Inputs.range(
+  [-3, 6],
+  {value: 2, step: 0.25, label: "Mean Incremental QALY:"}
+)
+
+viewof sd_cost_pct = Inputs.range(
+  [10, 80],
+  {value: 30, step: 5, label: "Cost Uncertainty (% SD):"}
+)
+
+viewof sd_qaly_pct = Inputs.range(
+  [10, 80],
+  {value: 20, step: 5, label: "QALY Uncertainty (% SD):"}
+)
+
+viewof wtp_plane = Inputs.range(
+  [50000, 500000],
+  {value: 150000, step: 10000, label: "WTP Threshold (₹/QALY):"}
+)
+```
+
+```{ojs}
+//| panel: fill
+
+// Box-Muller transform for normal distribution
+function randn_bm() {
+  let u = 0, v = 0;
+  while(u === 0) u = Math.random();
+  while(v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+// Generate PSA simulation data with flexible parameters
+psa_data = {
+  const sd_cost = Math.abs(mean_inc_cost) * (sd_cost_pct / 100);
+  const sd_qaly = Math.abs(mean_inc_qaly) * (sd_qaly_pct / 100);
+
+  return Array.from({length: psa_points}, () => ({
+    inc_cost: mean_inc_cost + randn_bm() * sd_cost,
+    inc_qaly: mean_inc_qaly + randn_bm() * sd_qaly
+  }));
+}
+
+// Calculate comprehensive quadrant statistics
+quadrant_stats = {
+  const ne = psa_data.filter(d => d.inc_cost > 0 && d.inc_qaly > 0).length;
+  const nw = psa_data.filter(d => d.inc_cost > 0 && d.inc_qaly < 0).length;
+  const se = psa_data.filter(d => d.inc_cost < 0 && d.inc_qaly > 0).length;
+  const sw = psa_data.filter(d => d.inc_cost < 0 && d.inc_qaly < 0).length;
+
+  // Cost-effective calculations for NE quadrant
+  const ne_ce = psa_data.filter(d => 
+    d.inc_cost > 0 && d.inc_qaly > 0 && (d.inc_cost / d.inc_qaly) < wtp_plane
+  ).length;
+
+  // Acceptable in SW quadrant (savings justify QALY loss)
+  const sw_acceptable = psa_data.filter(d =>
+    d.inc_cost < 0 && d.inc_qaly < 0 && Math.abs(d.inc_cost / d.inc_qaly) < wtp_plane
+  ).length;
+
+  // Total cost-effective (SE + NE_CE + SW_acceptable)
+  const total_ce = se + ne_ce + sw_acceptable;
+
+  return {
+    ne: (ne / psa_points * 100).toFixed(1),
+    nw: (nw / psa_points * 100).toFixed(1),
+    se: (se / psa_points * 100).toFixed(1),
+    sw: (sw / psa_points * 100).toFixed(1),
+    ne_ce: (ne_ce / psa_points * 100).toFixed(1),
+    sw_acceptable: (sw_acceptable / psa_points * 100).toFixed(1),
+    prob_ce: (total_ce / psa_points * 100).toFixed(1)
+  };
+}
+
+// Dynamic axis ranges based on data
+axis_ranges = {
+  const all_costs = psa_data.map(d => d.inc_cost);
+  const all_qalys = psa_data.map(d => d.inc_qaly);
+
+  const min_cost = Math.min(...all_costs, 0);
+  const max_cost = Math.max(...all_costs, 0);
+  const min_qaly = Math.min(...all_qalys, 0);
+  const max_qaly = Math.max(...all_qalys, 0);
+
+  return {
+    cost: [min_cost * 1.2, max_cost * 1.2],
+    qaly: [min_qaly * 1.2, max_qaly * 1.2]
+  };
+}
+
+Plot.plot({
+  width: 800,
+  height: 550,
+  grid: true,
+  x: {
+    label: "Incremental QALYs →",
+    domain: axis_ranges.qaly
+  },
+  y: {
+    label: "↑ Incremental Cost (₹)",
+    domain: axis_ranges.cost
+  },
+  marks: [
+    // WTP threshold lines (positive and negative slopes)
+    Plot.line(
+      [
+        {x: 0, y: 0}, 
+        {x: axis_ranges.qaly[1], y: wtp_plane * axis_ranges.qaly[1]}
+      ],
+      {x: "x", y: "y", stroke: "red", strokeWidth: 2, strokeDasharray: "5,5"}
+    ),
+    Plot.line(
+      [
+        {x: 0, y: 0}, 
+        {x: axis_ranges.qaly[0], y: -wtp_plane * axis_ranges.qaly[0]}
+      ],
+      {x: "x", y: "y", stroke: "red", strokeWidth: 2, strokeDasharray: "5,5"}
+    ),
+
+    // Axes
+    Plot.ruleX([0], {stroke: "black", strokeWidth: 2}),
+    Plot.ruleY([0], {stroke: "black", strokeWidth: 2}),
+
+    // PSA points with color by quadrant
+    Plot.dot(psa_data, {
+      x: "inc_qaly",
+      y: "inc_cost",
+      fill: d => {
+        if (d.inc_cost < 0 && d.inc_qaly > 0) return "darkgreen"; // SE - dominant
+        if (d.inc_cost > 0 && d.inc_qaly < 0) return "darkred";   // NW - dominated
+        if (d.inc_cost > 0 && d.inc_qaly > 0) {
+          return (d.inc_cost / d.inc_qaly) < wtp_plane ? "steelblue" : "lightcoral"; // NE
+        }
+        if (d.inc_cost < 0 && d.inc_qaly < 0) {
+          return Math.abs(d.inc_cost / d.inc_qaly) < wtp_plane ? "orange" : "pink"; // SW
+        }
+        return "gray";
+      },
+      fillOpacity: 0.4,
+      r: 3
+    }),
+
+    // Mean point
+    Plot.dot([{x: mean_inc_qaly, y: mean_inc_cost}], {
+      x: "x",
+      y: "y",
+      fill: "red",
+      stroke: "white",
+      strokeWidth: 2,
+      r: 10,
+      symbol: "diamond"
+    }),
+
+    // Quadrant labels
+    Plot.text([
+      {x: axis_ranges.qaly[1] * 0.6, y: axis_ranges.cost[1] * 0.7, 
+       label: "NE: More costly,\nmore effective"},
+      {x: axis_ranges.qaly[0] * 0.6, y: axis_ranges.cost[1] * 0.7, 
+       label: "NW: DOMINATED\n(favours rejection)"},
+      {x: axis_ranges.qaly[1] * 0.6, y: axis_ranges.cost[0] * 0.7,
+       label: "SE: DOMINANT\n(favours adoption)"},
+      {x: axis_ranges.qaly[0] * 0.6, y: axis_ranges.cost[0] * 0.7, 
+       label: "SW: Less costly,\nless effective"}
+    ], {
+      x: "x",
+      y: "y",
+      text: "label",
+      fill: "gray",
+      fontSize: 11,
+      fontWeight: "bold"
+    })
+  ]
+})
+
+html`
+<div style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
+  <h4>Probabilistic Sensitivity Analysis Results</h4>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+    <div style="padding: 10px; background-color: white; border-radius: 4px;">
+      <strong>Quadrant Distribution:</strong>
+      <ul style="margin: 5px 0; padding-left: 20px;">
+        <li>NE (more costly/effective): ${quadrant_stats.ne}%
+          <ul><li style="color: steelblue;">Cost-effective in NE: ${quadrant_stats.ne_ce}%</li></ul>
+        </li>
+        <li style="color: darkred;">NW (dominated): ${quadrant_stats.nw}%</li>
+        <li style="color: darkgreen;">SE (dominant): ${quadrant_stats.se}%</li>
+        <li>SW (less costly/effective): ${quadrant_stats.sw}%
+          <ul><li style="color: orange;">Acceptable in SW: ${quadrant_stats.sw_acceptable}%</li></ul>
+        </li>
+      </ul>
+    </div>
+
+    <div style="padding: 10px; background-color: white; border-radius: 4px;">
+      <strong>Decision Summary:</strong>
+      <p style="font-size: 18px; font-weight: bold; color: #0066cc; margin: 10px 0;">
+        ${quadrant_stats.prob_ce}% probability cost-effective
+      </p>
+      <p style="font-size: 14px; margin: 5px 0;">
+        At threshold: ₹${wtp_plane.toLocaleString('en-IN')}/QALY
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 10px 0 0 0;">
+        <em>Includes: SE (dominant) + NE (below threshold) + SW (acceptable trade-offs)</em>
+      </p>
+    </div>
+  </div>
+
+  <div style="padding: 10px; background-color: #fff3cd; border-radius: 4px; margin-top: 10px;">
+    <strong>💡 Interpretation Tips:</strong>
+    <ul style="margin: 5px 0; padding-left: 20px; font-size: 14px;">
+      <li><strong>Red diamond</strong> = mean (base-case) result</li>
+      <li><strong>Red dashed lines</strong> = WTP threshold boundaries</li>
+      <li><strong>Dark green points</strong> = dominant (SE quadrant)</li>
+      <li><strong>Dark red points</strong> = dominated (NW quadrant)</li>
+      <li><strong>Blue/coral points</strong> = NE quadrant (blue = cost-effective)</li>
+      <li><strong>Orange/pink points</strong> = SW quadrant (orange = acceptable)</li>
+    </ul>
+  </div>
+</div>
+`
+```
+
+::: {.callout-important}
+## Understanding Uncertainty
+
+- **Wide scatter** = high uncertainty in results → need more research
+- **Narrow scatter** = low uncertainty → confident in decision
+- **Points crossing quadrants** = parameter uncertainty affects interpretation
+- **Points below/above threshold lines** = decision uncertainty
+
+**Decision Rule**: Generally want >50-60% probability cost-effective for adoption
+:::
+
+## Part 3: Cost-Effectiveness Acceptability Curve
+
+The CEAC shows the probability an intervention is cost-effective across different WTP thresholds.
+
+```{ojs}
+// Generate comprehensive CEAC data
+ceac_data = {
+  const thresholds = Array.from({length: 40}, (_, i) => 25000 + i * 12500);
+
+  return thresholds.map(threshold => {
+    // SE quadrant - always cost-effective (dominant)
+    const se_count = psa_data.filter(d => d.inc_cost < 0 && d.inc_qaly > 0).length;
+
+    // NE quadrant - cost-effective if ICER < threshold
+    const ne_ce = psa_data.filter(d => 
+      d.inc_cost > 0 && d.inc_qaly > 0 && (d.inc_cost / d.inc_qaly) < threshold
+    ).length;
+
+    // SW quadrant - acceptable if savings justify QALY loss
+    const sw_accept = psa_data.filter(d =>
+      d.inc_cost < 0 && d.inc_qaly < 0 && Math.abs(d.inc_cost / d.inc_qaly) < threshold
+    ).length;
+
+    // NW quadrant - never acceptable (dominated)
+
+    const total_acceptable = se_count + ne_ce + sw_accept;
+
+    return {
+      threshold: threshold,
+      probability: total_acceptable / psa_points,
+      se_prob: se_count / psa_points,
+      ne_prob: ne_ce / psa_points,
+      sw_prob: sw_accept / psa_points
+    };
+  });
+}
+
+Plot.plot({
+  width: 800,
+  height: 450,
+  marginLeft: 70,
+  marginBottom: 60,
+  x: {
+    label: "Willingness-to-Pay Threshold (₹/QALY) →",
+    tickFormat: d => `₹${(d/1000).toFixed(0)}k`
+  },
+  y: {
+    label: "↑ Probability Cost-Effective",
+    domain: [0, 1],
+    tickFormat: d => `${(d * 100).toFixed(0)}%`
+  },
+  grid: true,
+  marks: [
+    // Total CEAC line
+    Plot.line(ceac_data, {
+      x: "threshold",
+      y: "probability",
+      stroke: "#0066cc",
+      strokeWidth: 4
+    }),
+    Plot.dot(ceac_data, {
+      x: "threshold",
+      y: "probability",
+      fill: "#0066cc",
+      r: 3
+    }),
+
+    // Current threshold line
+    Plot.ruleX([wtp_plane], {
+      stroke: "red",
+      strokeWidth: 2,
+      strokeDasharray: "5,5"
+    }),
+
+    // 50% probability line
+    Plot.ruleY([0.5], {
+      stroke: "gray",
+      strokeWidth: 1,
+      strokeDasharray: "3,3"
+    }),
+
+    // Indian threshold range shading
+    Plot.rectY([{x1: 100000, x2: 150000, y: 1}], {
+      x1: "x1",
+      x2: "x2",
+      y: "y",
+      fill: "lightgreen",
+      fillOpacity: 0.1
+    })
+  ]
+})
+
+// Find probability at selected threshold
+prob_at_threshold = ceac_data.find(d => Math.abs(d.threshold - wtp_plane) < 13000)
+
+html`
+<div style="margin-top: 15px;">
+  <div style="padding: 15px; background-color: #fff3cd; border-radius: 8px; margin-bottom: 10px;">
+    <p><strong>At selected threshold of ₹${wtp_plane.toLocaleString('en-IN')}/QALY:</strong></p>
+    <p style="font-size: 22px; font-weight: bold; color: #856404; margin: 10px 0;">
+      ${prob_at_threshold ? (prob_at_threshold.probability * 100).toFixed(1) : 'N/A'}% probability cost-effective
+    </p>
+    ${prob_at_threshold ? `
+      <div style="font-size: 14px; color: #666;">
+        <p style="margin: 5px 0;">Breakdown by quadrant:</p>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+          <li>SE (dominant): ${(prob_at_threshold.se_prob * 100).toFixed(1)}%</li>
+          <li>NE (cost-effective): ${(prob_at_threshold.ne_prob * 100).toFixed(1)}%</li>
+          <li>SW (acceptable): ${(prob_at_threshold.sw_prob * 100).toFixed(1)}%</li>
+        </ul>
+      </div>
+    ` : ''}
+  </div>
+
+  <div style="padding: 15px; background-color: #d1ecf1; border-radius: 8px;">
+    <strong>📊 CEAC Interpretation:</strong>
+    <ul style="margin: 5px 0; padding-left: 20px; font-size: 14px;">
+      <li><strong>Steep curve</strong>: Result highly sensitive to threshold choice</li>
+      <li><strong>Flat curve</strong>: Result robust across thresholds</li>
+      <li><strong>Green shaded area</strong>: Common Indian WTP range (₹1-1.5 lakh/QALY)</li>
+      <li><strong>Above 50% line</strong>: More likely cost-effective than not</li>
+      <li><strong>Curve never reaches 100%</strong>: Some simulations always in NW (dominated)</li>
+    </ul>
+  </div>
+</div>
+`
+```
+
+::: {.callout-note}
+## How to Read CEAC
+
+The CEAC answers: "What's the probability this intervention is cost-effective at different thresholds?"
+
+**Key Features:**
+- **X-axis**: Different WTP threshold values
+- **Y-axis**: Probability of being cost-effective
+- **Steep sections**: Uncertainty concentrated in that threshold range
+- **Plateau regions**: Probability stable (less sensitivity to threshold)
+
+**Decision Guidelines:**
+- **>70-80%**: Strong evidence for adoption
+- **50-70%**: Moderate evidence, may need additional research
+- **<50%**: Weak evidence, likely not cost-effective
+:::
+
+## Part 4: Deterministic Sensitivity Analysis (Tornado Diagram)
+
+One-way (deterministic) sensitivity analysis varies each parameter individually while holding others at base-case values. The **tornado diagram** ranks parameters by their influence on the result.
+
+```{r}
+library(tidyverse)
+set.seed(123)
+
+n <- 5000
+delta_qaly <- rnorm(n, mean=0.04, sd=0.03)
+delta_cost <- rnorm(n, mean=6000, sd=7000)
+psa <- tibble(delta_cost, delta_qaly)
+
+lambda <- 250000
+base_nmb <- lambda * mean(psa$delta_qaly) - mean(psa$delta_cost)
+
+params <- tibble(
+  param = c("Treatment cost", "Utility gain", "Hospitalisation rate", "Adherence", "Mortality risk"),
+  low  = c(-12000, -9000, -7000, -5000, -4000),
+  high = c( 14000,  11000,  9000,  7000,  6000)
+) |>
+  mutate(low_nmb  = base_nmb + low,
+         high_nmb = base_nmb + high)
+
+params_long <- params |>
+  pivot_longer(cols = c(low_nmb, high_nmb), names_to = "type", values_to = "nmb")
+
+ggplot(params_long, aes(nmb, reorder(param, nmb), fill = type)) +
+  geom_col(position = "identity", alpha = .8) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(x = "Net Monetary Benefit (Rs.)",
+       y = "Parameter",
+       title = "Tornado Diagram") +
+  theme_minimal(base_size = 16) +
+  theme(legend.position = "none")
+```
+
+::: {.callout-note}
+## Interpreting the Tornado Diagram
+
+- **Long bars** indicate parameters that strongly influence the decision — these are priorities for better evidence.
+- **Short bars** indicate parameters where uncertainty matters less.
+- If a bar **crosses zero**, varying that single parameter can reverse the adoption decision.
+- The tornado diagram complements PSA: it shows *which* parameters drive uncertainty, while PSA shows *overall* decision uncertainty.
+:::
+
+## Part 5: Expected Value of Perfect Information (EVPI)
+
+EVPI quantifies the maximum amount a decision-maker should be willing to pay for additional research to eliminate all parameter uncertainty before making a decision.
+
+```{r}
+lambda_seq <- seq(0, 300000, 5000)
+
+evpi <- map_df(lambda_seq, function(l) {
+  nmb <- l * psa$delta_qaly - psa$delta_cost
+  evpi_val <- mean(pmax(nmb, 0)) - max(mean(nmb), 0)
+  tibble(wtp = l, evpi = evpi_val)
+})
+
+ggplot(evpi, aes(wtp, evpi)) +
+  geom_line(linewidth = 1.4, colour = "#d95f02") +
+  geom_vline(xintercept = 250000, linetype = "dashed", colour = "grey50") +
+  labs(x = "WTP (Rs./QALY)",
+       y = "EVPI per patient (Rs.)",
+       title = "Expected Value of Perfect Information") +
+  theme_minimal(base_size = 16)
+```
+
+::: {.callout-note}
+## Interpreting EVPI
+
+- **Low EVPI** at the policy threshold suggests current evidence is sufficient — proceed with the decision.
+- **High EVPI** suggests substantial value in commissioning further research before committing resources.
+- EVPI peaks near thresholds where the decision is most uncertain (probability of cost-effectiveness close to 50%).
+- EVPI is always expressed **per patient**; multiply by the eligible population to estimate the total value of research.
+:::
+
+## Part 6: Budget Impact Analysis
+
+Cost-effectiveness does not guarantee affordability. Budget impact analysis estimates the financial consequences of adopting a new intervention at the health-system level over a defined time horizon.
+
+```{r}
+years <- 1:5
+uptake <- c(.10, .25, .45, .65, .80)
+eligible <- 200000
+cost_patient <- 1500
+
+budget <- tibble(
+  year = years,
+  treated = eligible * uptake,
+  annual_cost = treated * cost_patient
+)
+
+ggplot(budget, aes(year, annual_cost / 1e7)) +
+  geom_col(fill = "#54278f") +
+  labs(x = "Year",
+       y = "Budget Impact (Crores Rs.)",
+       title = "5-Year Budget Impact with Gradual Uptake") +
+  theme_minimal(base_size = 16)
+```
+
+::: {.callout-note}
+## Interpreting Budget Impact
+
+- Budget impact depends on **eligible population size** and **uptake trajectory**, not just per-patient cost.
+- An intervention can be cost-effective (favourable ICER) yet **unaffordable** if the eligible population is large.
+- Decision-makers use BIA alongside CE results to assess whether the health system can absorb the expenditure within existing or projected budgets.
+:::
+
+## Part 7: Real-World Case Study
+
+**Scenario:** Portable Peritoneal Dialysis vs. In-Center Hemodialysis for End-Stage Renal Disease in India
+
+```{ojs}
+// Real case data
+case_data = ({
+  intervention: "Portable Peritoneal Dialysis",
+  comparator: "In-Center Hemodialysis",
+  cost_int: 185000,
+  cost_comp: 250000,
+  qaly_int: 6.2,
+  qaly_comp: 5.8,
+  inc_cost: -65000,
+  inc_qaly: 0.4,
+  icer: -162500
+})
+
+html`
+<div style="padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;">
+  <h4>Base Case Results</h4>
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="background-color: #e9ecef;">
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Strategy</th>
+        <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Total Cost (₹)</th>
+        <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Total QALYs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">${case_data.intervention}</td>
+        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${case_data.cost_int.toLocaleString('en-IN')}</td>
+        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">${case_data.qaly_int.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">${case_data.comparator}</td>
+        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">₹${case_data.cost_comp.toLocaleString('en-IN')}</td>
+        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">${case_data.qaly_comp.toFixed(2)}</td>
+      </tr>
+      <tr style="background-color: #d1ecf1; font-weight: bold;">
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Incremental</td>
+        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6; color: green;">₹${case_data.inc_cost.toLocaleString('en-IN')}</td>
+        <td style="padding: 10px; text-align: right; border: 1px solid #dee2e6; color: green;">${case_data.inc_qaly.toFixed(2)}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="margin-top: 15px; padding: 15px; background-color: #d4edda; border-radius: 4px; border-left: 4px solid darkgreen;">
+    <p style="font-size: 20px; font-weight: bold; color: darkgreen; margin: 0 0 5px 0;">
+      Result: DOMINANT ✓✓
+    </p>
+    <p style="margin: 5px 0;">Portable dialysis is less costly AND more effective</p>
+    <p style="margin: 5px 0; font-size: 14px; color: #155724;">
+      <strong>Location:</strong> South-East quadrant of CE plane<br>
+      <strong>Decision:</strong> Strong case for adoption<br>
+      <strong>ICER:</strong> ₹${case_data.icer.toLocaleString('en-IN')}/QALY (saves money, gains health)
+    </p>
+  </div>
+</div>
+`
+```
+
+### Group Exercise
+
+Answer these questions based on the case above:
+
+```{ojs}
+viewof q1_answer = Inputs.radio(
+  ["Cost-effective", "Not cost-effective", "Dominant", "Dominated"],
+  {label: "Q1: What is the cost-effectiveness status?", value: null}
+)
+
+viewof q2_answer = Inputs.radio(
+  ["North-East", "North-West", "South-East", "South-West"],
+  {label: "Q2: Which quadrant of CE plane?", value: null}
+)
+
+viewof q3_answer = Inputs.radio(
+  ["Strong case for adoption", "Recommend with conditions", "Do not recommend", "Need more data"],
+  {label: "Q3: Policy recommendation?", value: null}
+)
+
+viewof q4_answer = Inputs.radio(
+  ["Yes, always", "No, never", "Only if below threshold", "Depends on uncertainty"],
+  {label: "Q4: Do we need to compare ICER to threshold?", value: null}
+)
+
+// Button with proper handling
+viewof show_answers_btn = Inputs.button("Show Correct Answers")
+```
+
+```{ojs}
+// Track button clicks
+show_answers_count = show_answers_btn
+
+html`
+${show_answers_count > 0 ? `
+<div style="margin-top: 20px; padding: 15px; background-color: #d4edda; border-radius: 8px;">
+  <h4>✓ Correct Answers:</h4>
+  <p><strong>Q1:</strong> Dominant (provides more QALYs at lower cost)</p>
+  <p><strong>Q2:</strong> South-East quadrant (less costly, more effective)</p>
+  <p><strong>Q3:</strong> Strong case for adoption (subject to equity, feasibility, and budget considerations)</p>
+  <p><strong>Q4:</strong> No, never - Dominant strategies don't require threshold comparison</p>
+
+  <div style="margin-top: 15px; padding: 10px; background-color: white; border-radius: 4px;">
+    <p style="font-weight: bold; color: #155724;">💡 Key Learning Points:</p>
+    <ul style="margin: 5px 0; padding-left: 20px;">
+      <li>Dominant interventions (SE quadrant) have the <strong>strongest CE case</strong> for adoption</li>
+      <li>No need to compare ICER to threshold for dominant strategies</li>
+      <li>This is the ideal CE outcome — better health at lower cost</li>
+      <li>Final decisions still consider equity, budget feasibility, and implementation context</li>
+    </ul>
+  </div>
+</div>
+` : ''}
+`
+```
+
+## Part 8: Spot the Error
+
+Identify mistakes in these common misinterpretations:
+
+```{ojs}
+viewof scenario = Inputs.select(
+  ["Scenario 1", "Scenario 2", "Scenario 3", "Scenario 4", "Scenario 5"],
+  {label: "Select scenario:", value: "Scenario 1"}
+)
+
+scenarios = ({
+  "Scenario 1": {
+    statement: "The ICER is ₹180,000/QALY. Since this is positive, the intervention is cost-effective.",
+    error: "Confusing positive ICER with cost-effectiveness. Must compare to WTP threshold.",
+    correct: "An ICER of ₹180,000/QALY exceeds typical Indian thresholds (₹100k-150k), so likely NOT cost-effective. Positive ICER only means more costly - doesn't indicate value for money."
+  },
+  "Scenario 2": {
+    statement: "The intervention is in the North-West quadrant, but has a low ICER, so we should adopt it.",
+    error: "North-West = more costly AND less effective (dominated). Should NEVER be adopted regardless of ICER value.",
+    correct: "North-West quadrant interventions are dominated and should be rejected immediately. No ICER comparison needed - it's strictly worse than the comparator."
+  },
+  "Scenario 3": {
+    statement: "The base-case ICER is ₹120,000/QALY (below threshold), so the intervention is cost-effective.",
+    error: "Ignoring uncertainty. Must consider PSA results and probability of cost-effectiveness.",
+    correct: "While base-case looks favorable, check PSA scatter and CEAC. If probability <50%, there's high decision uncertainty. May need more research."
+  },
+  "Scenario 4": {
+    statement: "The ICER is negative (−₹50,000/QALY), which means the intervention is not cost-effective.",
+    error: "Misunderstanding negative ICERs. Could be dominant (SE quadrant) or in SW quadrant - need more information.",
+    correct: "Negative ICER needs context. If in SE quadrant (saves money, gains QALYs) = dominant, favours adoption. If in SW quadrant (saves money, loses QALYs) = compare absolute value to threshold."
+  },
+  "Scenario 5": {
+    statement: "The intervention is in the SW quadrant (saves ₹80,000, loses 0.4 QALYs). Since it saves money, we should adopt it.",
+    error: "Ignoring health losses. Must calculate whether society values the cost savings more than the QALYs foregone.",
+    correct: "ICER = −₹200,000/QALY (society pays ₹200,000 per QALY foregone). If threshold is ₹150,000/QALY, this exceeds willingness-to-pay for health, so reject. The cost savings don't justify the health loss."
+  }
+})
+
+html`
+<div style="padding: 20px; background-color: #fff3cd; border-radius: 8px; margin: 20px 0;">
+  <h4>Incorrect Interpretation:</h4>
+  <p style="font-size: 16px; font-style: italic; padding: 15px; background-color: white; border-left: 4px solid #ffc107; margin: 10px 0;">
+    "${scenarios[scenario].statement}"
+  </p>
+  <button id="reveal-${scenario}" onclick="
+    document.getElementById('error-${scenario}').style.display = 'block';
+    document.getElementById('correct-${scenario}').style.display = 'block';
+    this.style.display = 'none';
+  " style="margin-top: 10px; padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+    Reveal Error & Correction
+  </button>
+  <div id="error-${scenario}" style="display: none; margin-top: 15px; padding: 15px; background-color: #f8d7da; border-radius: 4px; border-left: 4px solid #dc3545;">
+    <p style="margin: 0;"><strong>❌ Error:</strong> ${scenarios[scenario].error}</p>
+  </div>
+  <div id="correct-${scenario}" style="display: none; margin-top: 10px; padding: 15px; background-color: #d4edda; border-radius: 4px; border-left: 4px solid #28a745;">
+    <p style="margin: 0;"><strong>✓ Correct Interpretation:</strong> ${scenarios[scenario].correct}</p>
+  </div>
+</div>
+`
+```
+
+## Takeaway: HTA Interpretation Checklist
+
+Use this systematic framework for interpreting any economic evaluation:
+
+### 1. Base-Case Results
+- [ ] Calculate incremental costs and effects
+- [ ] Determine CE plane quadrant (NE, NW, SE, SW)
+- [ ] Calculate ICER (if applicable)
+- [ ] Compare to appropriate WTP threshold
+- [ ] Check for dominance or dominated strategies
+
+### 2. Uncertainty Analysis
+- [ ] Review PSA scatter plot distribution across quadrants
+- [ ] Check CEAC at relevant thresholds
+- [ ] Assess probability of cost-effectiveness (target >50-70%)
+- [ ] Evaluate robustness of findings
+
+### 3. Deterministic Sensitivity Analysis
+- [ ] Review tornado diagram for key drivers
+- [ ] Check whether any single parameter reverses the decision (bar crosses zero)
+- [ ] Prioritise parameters with largest influence for further evidence
+
+### 4. Research Value
+- [ ] Check EVPI at the policy threshold
+- [ ] If EVPI is high, consider whether further research is warranted before deciding
+- [ ] Use EVPPI (if available) to identify which parameter merits targeted research
+
+### 5. Budget Impact & Affordability
+- [ ] Estimate eligible population and likely uptake trajectory
+- [ ] Project annual and cumulative budget impact over 3–5 years
+- [ ] Assess whether cost-effective intervention is also affordable within current budgets
+
+### 6. Context & Applicability
+- [ ] Are costs relevant to Indian healthcare setting?
+- [ ] Is the comparator appropriate for local clinical practice?
+- [ ] Are outcomes meaningful to patients and policymakers?
+- [ ] Consider equity and access implications
+
+### 7. Decision Recommendation
+- [ ] State clear cost-effectiveness status
+- [ ] Express confidence level (based on PSA/CEAC)
+- [ ] List any conditions or caveats
+- [ ] Identify research gaps or areas of uncertainty
+- [ ] Consider implementation and feasibility factors
+
+::: {.callout-tip}
+## Continue Practicing
+- [Practice Cases with Solutions](practice.qmd)
+- [Additional Resources](resources.qmd)
+:::
+
+---
+
+## Next Steps
+
+- [Practice with more cases](practice.qmd)
+- [Recommended reading and resources](resources.qmd)
+
+**Questions?** Contact [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)

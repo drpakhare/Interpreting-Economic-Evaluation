@@ -1,0 +1,245 @@
+---
+title: "Practice Cases"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## Case Study 1: Rotavirus Vaccination Program
+
+### Background
+India evaluated the domestically-produced rotavirus vaccine (116E strain, ROTAVAC) for inclusion in the Universal Immunization Program. This case is based on published HTAIn-related research.
+
+### Study Details
+- **Intervention**: Universal rotavirus vaccination using ROTAVAC
+- **Population**: Birth cohort of Indian infants
+- **Time horizon**: Lifetime
+- **Perspective**: Government healthcare system
+
+### Base-Case Results
+- **Incremental Cost**: ₹3,429 per DALY averted
+- **Incremental QALYs**: 0.85 per child vaccinated
+- **WTP Threshold**: ₹2,50,000 per QALY (1× GDP per capita for India)
+- **ICER**: ₹4,035 per QALY gained
+
+### Probabilistic Sensitivity Analysis
+- **Simulations**: 1,000 Monte Carlo iterations
+- **Mean ICER**: ₹4,200 per QALY
+- **95% CI**: ₹3,100 - ₹5,800 per QALY
+- **Distribution on CE Plane**:
+  - Northeast quadrant: 98%
+  - Southeast quadrant: 2%
+  - Cost-effective at ₹2,50,000 threshold: 99.8%
+
+::: {.callout-tip collapse="true"}
+## Solution & Interpretation
+
+**Quadrant**: Northeast (NE) - More costly, more effective
+
+**ICER Interpretation**: The rotavirus vaccination costs ₹4,035 per QALY gained, which is **highly cost-effective** as it is far below the Indian WTP threshold of ₹2,50,000 per QALY (only 1.6% of threshold).
+
+**Decision**: With 99.8% probability of being cost-effective, this intervention should be **recommended for adoption**. India has indeed included ROTAVAC in the Universal Immunization Program.
+
+**Key Points**:
+
+- ICER is 62 times lower than threshold
+- 98% of PSA iterations in NE quadrant indicate consistent cost-effectiveness
+- Small percentage (2%) in SE quadrant suggests occasional dominance
+- Narrow confidence interval indicates robust findings
+- Public health impact: prevents ~53,000 child deaths annually
+:::
+
+---
+
+## Case Study 2: Pneumococcal Conjugate Vaccine (PCV)
+
+### Background
+HTAIn evaluated the introduction of 13-valent pneumococcal conjugate vaccine (PCV13) into India's routine immunization schedule for reducing childhood pneumonia mortality.
+
+### Study Details
+- **Intervention**: PCV13 vaccination program
+- **Population**: Children under 5 years
+- **Time horizon**: 10 years
+- **Perspective**: Government healthcare system
+
+### Base-Case Results
+- **Incremental Cost**: ₹31,666 per DALY averted
+- **Incremental QALYs**: 0.92 per child protected
+- **WTP Threshold**: ₹2,50,000 per QALY
+- **ICER**: ₹34,420 per QALY gained
+
+### Probabilistic Sensitivity Analysis
+- **Simulations**: 5,000 Monte Carlo iterations
+- **Mean ICER**: ₹44,008 per QALY
+- **95% CI**: ₹25,380 - ₹78,732 per QALY
+- **Distribution on CE Plane**:
+  - Northeast quadrant: 96%
+  - Southeast quadrant: 3%
+  - Northwest quadrant: 1%
+  - Cost-effective at ₹2,50,000 threshold: 99%
+
+::: {.callout-tip collapse="true"}
+## Solution & Interpretation
+
+**Quadrant**: Northeast (NE) - More costly, more effective
+
+**ICER Interpretation**: PCV13 vaccination costs ₹44,008 per QALY gained, which is **highly cost-effective** as it is only 17.6% of the Indian WTP threshold of ₹2,50,000 per QALY.
+
+**Decision**: With 99% probability of being cost-effective and strong clinical evidence, this intervention should be **recommended for implementation**. Several Indian states have introduced PCV into their immunization programs.
+
+**Key Points**:
+
+- ICER is nearly 6 times lower than threshold
+- Wide confidence interval reflects uncertainty in vaccine efficacy and coverage
+- 96% of iterations in NE quadrant confirms consistent value
+- Small NW quadrant presence (1%) suggests edge cases where intervention may not be effective
+- Budget impact: ₹467 per DALY averted makes it affordable
+- Most unfavorable scenario still yields ICER of ₹1,57,520 (63% of threshold)
+:::
+
+---
+
+## Case Study 3: Cy-Tb Test for Latent Tuberculosis Infection (LTBI)
+
+### Background
+HTAIn evaluated a novel Cy-Tb diagnostic test for latent tuberculosis infection compared to the traditional Tuberculin Skin Test (TST), followed by preventive therapy in high-risk contacts.
+
+### Study Details
+- **Intervention**: Cy-Tb test + 6-month preventive therapy
+- **Comparator**: TST + 6-month preventive therapy
+- **Population**: TB contacts at high risk of progression
+- **Time horizon**: 5 years
+- **Perspective**: National TB Elimination Program
+
+### Base-Case Results
+- **Incremental Cost**: ₹8,832,873 (total program)
+- **Incremental TB cases prevented**: 473
+- **WTP Threshold**: ₹2,50,000 per case prevented
+- **ICER**: ₹18,658 per TB case prevented
+
+### Probabilistic Sensitivity Analysis
+- **Simulations**: 1,000 Monte Carlo iterations
+- **Mean cost per case prevented**: ₹19,200
+- **95% CI**: ₹14,500 - ₹26,800
+- **Distribution on CE Plane**:
+  - Northeast quadrant: 55%
+  - Southeast quadrant: 25%
+  - Northwest quadrant: 15%
+  - Southwest quadrant: 5%
+  - Cost-effective at ₹2,50,000 threshold: 80%
+
+::: {.callout-tip collapse="true"}
+## Solution & Interpretation
+
+**Quadrant**: Predominantly Northeast (NE) - More costly, more effective (55%)
+
+**ICER Interpretation**: The Cy-Tb test costs ₹18,658 per additional TB case prevented compared to TST. This is **cost-effective** at 7.5% of the threshold of ₹2,50,000.
+
+**Decision**: With 55% probability of being in NE quadrant and overall 80% probability of cost-effectiveness, this intervention is **likely cost-effective** but with moderate uncertainty. Implementation should be considered with price negotiations.
+
+**Key Points**:
+
+- Higher uncertainty compared to vaccination programs
+- 25% probability of dominance (SE quadrant) suggests potential for cost savings
+- 15% in NW quadrant indicates scenarios where test may not improve detection
+- 5% in SW quadrant reflects trade-offs in specific subpopulations
+- One-way sensitivity analysis shows Cy-Tb kit cost is major driver
+- **Policy recommendation**: Bulk procurement and price negotiation could shift intervention toward dominance
+- TB prevention aligns with India's TB Elimination 2025 goal
+:::
+
+---
+
+## Interactive Practice: Common Interpretation Errors
+
+Test your understanding by identifying what's wrong with these interpretations:
+
+### Scenario A
+*An intervention has ICER = ₹3,50,000 per QALY gained. The researcher concludes: "This intervention is not cost-effective because it exceeds India's threshold."*
+
+::: {.callout-warning collapse="true"}
+## What's the Error?
+
+**Error**: While the ICER (₹3,50,000) exceeds the typical threshold of ₹2,50,000, **cost-effectiveness is not binary**. 
+
+**Correct Interpretation**: 
+- The intervention exceeds the threshold by 40%
+- It may still be acceptable depending on disease severity, budget impact, equity considerations
+- Many HTA agencies accept interventions above threshold for life-threatening conditions
+- NICE accepts up to £50,000/QALY for end-of-life care (2× standard threshold)
+- Decision should consider: uncertainty, affordability, equity, priority populations
+:::
+
+### Scenario B
+*A study reports 30% of PSA iterations in the Southeast quadrant. The researcher states: "30% of the time, this intervention dominates."*
+
+::: {.callout-warning collapse="true"}
+## What's the Error?
+
+**Error**: PSA iterations don't represent "% of time" - they represent **parameter uncertainty**, not temporal variation.
+
+**Correct Interpretation**:
+- "Given parameter uncertainty, there is a 30% probability that this intervention is dominant (less costly and more effective)"
+- This reflects uncertainty in model inputs (costs, effects, probabilities)
+- Does NOT mean intervention will be dominant 30% of the time in practice
+- Higher percentage in SE quadrant indicates stronger evidence for dominance
+:::
+
+### Scenario C
+*An intervention falls in the Southwest quadrant (less costly, less effective) with ICER = ₹80,000 per QALY lost. The analyst concludes: "This should be rejected because it's less effective."*
+
+::: {.callout-warning collapse="true"}
+## What's the Error?
+
+**Error**: SW quadrant interpretations are **inverted** - lower cost interventions may be preferred even if less effective.
+
+**Correct Interpretation**:
+- In SW quadrant, we ask: "Is the QALY loss acceptable given cost savings?"
+- ₹80,000 per QALY **lost** means we save ₹80,000 for each QALY foregone
+- If this exceeds WTP threshold (₹2,50,000), the cheaper option may be preferable
+- Since ₹80,000 < ₹2,50,000, the **cheaper intervention should be rejected** (cost savings don't justify health loss)
+- If it were > ₹2,50,000 saved per QALY lost, cheaper option could be preferred
+- Decision should also consider: budget constraints, access, equity
+:::
+
+---
+
+## Key Takeaways from Indian HTA Cases
+
+### Successful Implementation Factors
+1. **Strong evidence base**: Vaccination programs had robust RCT evidence
+2. **Affordability**: Even cost-effective interventions need budget impact analysis
+3. **Domestic production**: ROTAVAC's local manufacturing reduced costs significantly
+4. **Equity considerations**: Universal immunization reaches underserved populations
+5. **Policy alignment**: TB case aligns with national TB elimination goals
+
+### Threshold Considerations for India
+- **Standard threshold**: ₹2,50,000 per QALY (approximately 1× GDP per capita)
+- **Highly cost-effective**: <₹83,000 per QALY (0.3× GDP per capita)
+- **State-level variation**: Higher-income states may use higher thresholds
+- **Context matters**: Life-saving interventions may exceed threshold
+
+### Uncertainty & Implementation
+- **Narrow CI** (rotavirus): High confidence → rapid adoption
+- **Wide CI** (PCV): Additional real-world studies needed
+- **Moderate uncertainty** (Cy-Tb): Pilot programs and price negotiation recommended
+
+---
+
+## Additional Resources
+
+### HTAIn Case Studies
+- Visit [HTAIn Resources](https://htain.dhr.gov.in/index.php) → "What We Do" → Resources
+- Published policy briefs and outcome reports
+- State-level implementation guidance
+
+### Methodological Guidance
+- Indian Reference Case for HTA
+- ISPOR Good Practices for CEA
+- CHEERS 2022 reporting guidelines
+
+### Practice Tools
+- [Return to Interactive Session](session.html) to explore different scenarios
+- [View Presentation Slides](slides.html) for step-by-step guidance
+- [Explore More Resources](resources.html) for learning materials

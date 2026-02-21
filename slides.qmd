@@ -1,0 +1,447 @@
+---
+title: "Interpretation of Economic Evaluation Results in HTA"
+subtitle: "How Decision Makers Actually Read Cost-Effectiveness Studies"
+author: "RRC-HTA, AIIMS Bhopal"
+format:
+  revealjs:
+    theme: simple
+    slide-number: c/t
+    transition: fade
+    center: false
+    footer: "HTA Workshop | IGGMC Nagpur | Feb 24-25, 2026"
+    css: styles_slides.css
+    math: mathjax
+    code-overflow: wrap
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(scales)
+set.seed(123)
+```
+
+## Why This Session Exists
+
+Clinicians usually ask:
+
+> "Is the ICER below the threshold?"
+
+Policy makers instead ask:
+
+> "If we fund this — what health do we lose elsewhere?"
+
+Health Technology Assessment is a **resource allocation decision under a fixed health budget**.
+
+---
+
+## Learning Objectives
+
+By the end of this session, you will be able to:
+
+1. Interpret ICER results correctly across all quadrants
+2. Understand dominance and extended dominance
+3. Read the cost-effectiveness plane and its quadrants
+4. Interpret CEAC probabilities for decision-making
+5. Use Net Monetary Benefit as a decision rule
+6. Judge uncertainty and research value (EVPI/EVPPI)
+7. Translate results into policy recommendations
+
+---
+
+## Quick Recap: Key Concepts
+
+*(Covered in detail by earlier sessions — brief recap for context)*
+
+**QALY** (Quality-Adjusted Life Year): One year of life in perfect health = 1 QALY. Captures both length and quality of life. A utility of 0.7 for 2 years = 1.4 QALYs.
+
+**WTP threshold**: The maximum a health system is willing to pay per QALY gained. Reflects opportunity cost — health that could be produced elsewhere with the same money.
+
+**PSA** (Probabilistic Sensitivity Analysis): Runs the model thousands of times, each time sampling parameters from their uncertainty distributions, to show the range of plausible results — not just one point estimate.
+
+---
+
+## Incremental Analysis
+
+$$
+ICER = \frac{\Delta C}{\Delta E} = \frac{C_{new}-C_{current}}{E_{new}-E_{current}}
+$$
+
+Additional rupees required to generate one additional QALY relative to current care.
+
+---
+
+## Net Monetary Benefit
+
+$$
+NMB(\lambda) = \lambda \times \Delta E - \Delta C
+$$
+
+Adopt if **NMB > 0**
+
+NMB avoids the ratio problems of ICER — no division by zero, no ambiguous negative values.
+
+---
+
+## Opportunity Cost and the Threshold
+
+A threshold does **not** represent a "price society likes".
+
+It represents **health produced elsewhere** in the system using the same resources.
+
+Funding above this level causes **net population health loss**.
+
+::: {.callout-note}
+India's commonly used threshold: **₹2,50,000 per QALY** (~1× GDP per capita)
+:::
+
+---
+
+## Simulated Economic Evaluation
+
+```{r}
+n <- 5000
+delta_qaly <- rnorm(n, mean=0.04, sd=0.03)
+delta_cost <- rnorm(n, mean=6000, sd=7000)
+psa <- tibble(delta_cost, delta_qaly)
+```
+
+We simulate 5,000 PSA iterations for a hypothetical intervention:
+
+- Mean incremental QALY: **0.04**
+- Mean incremental cost: **₹6,000**
+- Both with considerable uncertainty
+
+---
+
+## Cost-Effectiveness Plane
+
+```{r}
+wtp <- 250000
+
+mean_pt <- psa |> summarise(dc=mean(delta_cost), de=mean(delta_qaly))
+ce_prob <- mean(wtp*psa$delta_qaly - psa$delta_cost > 0)
+
+ggplot(psa, aes(delta_qaly, delta_cost))+
+  geom_point(alpha=.25, colour="#2b8cbe", size=1.5)+
+  geom_hline(yintercept=0, linewidth=.5)+
+  geom_vline(xintercept=0, linewidth=.5)+
+  geom_abline(intercept=0, slope=wtp, colour="red", linewidth=1.2)+
+  geom_point(data=mean_pt, aes(de,dc), size=5, colour="black")+
+  annotate("text", x=.12, y=15000,
+           label=paste0(round(ce_prob*100,1),"% cost-effective"),
+           size=6)+
+  annotate("text", x=.10, y=20000, label="NE", size=5, fontface="bold")+
+  annotate("text", x=-.06, y=20000, label="NW", size=5, fontface="bold")+
+  annotate("text", x=.10, y=-15000, label="SE", size=5, fontface="bold")+
+  annotate("text", x=-.06, y=-15000, label="SW", size=5, fontface="bold")+
+  labs(x="Incremental QALYs",
+       y="Incremental Costs (Rs.)",
+       title="Cost-Effectiveness Plane")+
+  theme_minimal(base_size=18)
+```
+
+---
+
+## Four Quadrants of the CE Plane
+
+| Quadrant | Cost | Effect | Decision |
+|:---------|:-----|:-------|:---------|
+| **NE** | Higher | Better | Compare ICER to threshold |
+| **SE** | Lower | Better | **Dominant** — favours adoption |
+| **NW** | Higher | Worse | **Dominated** — favours rejection |
+| **SW** | Lower | Worse | Compare savings to QALY loss |
+
+::: {.callout-important}
+Only NE and SW quadrants require threshold comparison. SE and NW provide strong *prima facie* guidance, but real-world decisions also weigh equity, feasibility, and local context.
+:::
+
+---
+
+## How to Read the Cost-Effectiveness Plane
+
+* Each dot = one possible real-world outcome from PSA
+* Red line = WTP decision threshold (₹2,50,000/QALY)
+* **Below** the line → acceptable value for money
+* **Above** the line → poor value for money
+
+Probability of cost-effectiveness = proportion of PSA points below the threshold line.
+
+---
+
+## Cost-Effectiveness Acceptability Curve
+
+```{r}
+wtp_seq <- seq(0,300000,5000)
+
+ceac <- map_df(wtp_seq, function(l){
+  tibble(
+    wtp=l,
+    prob=mean(l*psa$delta_qaly - psa$delta_cost > 0)
+  )
+})
+
+ggplot(ceac, aes(wtp, prob))+
+  geom_line(linewidth=1.4, colour="#2c7fb8")+
+  geom_vline(xintercept=250000, linetype="dashed", linewidth=1)+
+  geom_point(data=filter(ceac, wtp==250000), size=4, colour="red")+
+  annotate("rect", xmin=0, xmax=250000, ymin=0, ymax=1,
+           alpha=.08, fill="green")+
+  scale_y_continuous(labels=scales::percent, limits=c(0,1))+
+  labs(x="Willingness-to-Pay (Rs. per QALY)",
+       y="Probability Cost-Effective",
+       title="Cost-Effectiveness Acceptability Curve")+
+  theme_minimal(base_size=18)
+```
+
+---
+
+## How to Read the CEAC
+
+* X-axis → willingness to pay threshold
+* Y-axis → probability the adoption decision is correct
+
+At the Indian policy threshold (₹2,50,000/QALY), the CEAC gives the **confidence level** for adoption.
+
+**Decision guidelines:**
+
+* >70–80%: Strong CE evidence — supports adoption
+* 50–70%: Moderate CE evidence — consider additional research
+* <50%: Weak CE evidence — adoption hard to justify on CE grounds alone
+
+---
+
+## Deterministic Sensitivity Analysis
+
+```{r}
+lambda <- 250000
+base_nmb <- lambda*mean(psa$delta_qaly) - mean(psa$delta_cost)
+
+params <- tibble(
+  param=c("Treatment cost","Utility gain","Hospitalisation rate","Adherence","Mortality risk"),
+  low=c(-12000,-9000,-7000,-5000,-4000),
+  high=c(14000,11000,9000,7000,6000)
+)
+
+params <- params |>
+  mutate(low_nmb = base_nmb + low,
+         high_nmb = base_nmb + high)
+
+params_long <- params |>
+  pivot_longer(cols=c(low_nmb,high_nmb), names_to="type", values_to="nmb")
+
+ggplot(params_long, aes(nmb, reorder(param, nmb), fill=type))+
+  geom_col(position="identity", alpha=.8)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  labs(x="Net Monetary Benefit (Rs.)",
+       y="Parameter",
+       title="Tornado Diagram")+
+  theme_minimal(base_size=18)+
+  theme(legend.position="none")
+```
+
+---
+
+## How to Interpret the Tornado Diagram
+
+* **Long bars** → influential parameters (drive the decision)
+* **Short bars** → unimportant assumptions
+
+The **longest bar** identifies what evidence is needed next.
+
+If a bar **crosses zero**, that parameter alone can reverse the decision.
+
+---
+
+## Efficiency Frontier
+
+```{r}
+interv <- tibble(
+  name=c("Current care","A","B","C"),
+  cost=c(20000,26000,34000,48000),
+  qaly=c(6.0,6.5,6.9,7.1)
+)
+
+ggplot(interv, aes(qaly, cost, label=name))+
+  geom_point(size=4)+
+  geom_line(linewidth=1, colour="#2c7fb8")+
+  geom_text(nudge_y=2000, size=5)+
+  labs(x="QALY",
+       y="Cost (Rs.)",
+       title="Cost-Effectiveness Frontier")+
+  theme_minimal(base_size=18)
+```
+
+The frontier connects **non-dominated strategies**. Options below the frontier are dominated or extendedly dominated.
+
+---
+
+## Expected Value of Perfect Information (EVPI)
+
+```{r}
+lambda_seq <- seq(0,300000,5000)
+
+evpi <- map_df(lambda_seq, function(l){
+  nmb <- l*psa$delta_qaly - psa$delta_cost
+  evpi_val <- mean(pmax(nmb,0)) - max(mean(nmb),0)
+  tibble(wtp=l, evpi=evpi_val)
+})
+
+ggplot(evpi, aes(wtp,evpi))+
+  geom_line(linewidth=1.4, colour="#d95f02")+
+  geom_vline(xintercept=250000, linetype="dashed", colour="grey50")+
+  labs(x="WTP (Rs./QALY)",
+       y="EVPI per patient (Rs.)",
+       title="Expected Value of Perfect Information")+
+  theme_minimal(base_size=18)
+```
+
+---
+
+## What EVPI and EVPPI Mean
+
+**EVPI** answers: Is additional research worth funding?
+
+* Low EVPI → **decide now** with current evidence
+* High EVPI → **commission research** before deciding
+
+**EVPPI** goes further — it identifies **which parameter** merits further research.
+
+```{r}
+utility <- rnorm(n, 0.04, 0.03)
+cost_sim <- psa$delta_cost
+lambda_evppi <- 250000
+
+nmb <- lambda_evppi * utility - cost_sim
+
+evppi <- mean(tapply(nmb, cut(utility, 10), function(x) max(mean(x), 0))) -
+         max(mean(nmb), 0)
+
+tibble(Parameter = "Utility gain", `EVPPI (Rs.)` = round(evppi, 0)) |>
+  knitr::kable()
+```
+
+High EVPPI for a parameter → prioritise research to reduce that uncertainty.
+
+---
+
+## Budget Impact
+
+```{r}
+years <- 1:5
+uptake <- c(.1,.25,.45,.65,.8)
+eligible <- 200000
+cost_patient <- 1500
+
+budget <- tibble(
+  year=years,
+  treated=eligible*uptake,
+  annual_cost=treated*cost_patient
+)
+
+ggplot(budget,aes(year,annual_cost/1e7))+
+  geom_col(fill="#54278f")+
+  labs(x="Year",
+       y="Budget Impact (Crores Rs.)",
+       title="5-Year Budget Impact with Uptake")+
+  theme_minimal(base_size=18)
+```
+
+Cost-effectiveness ≠ affordability. Budget impact analysis answers: **Can we actually pay for this?**
+
+---
+
+## Real-World Case: Portable Dialysis vs Hemodialysis
+
+| | Portable PD | In-Centre HD |
+|:--|:--|:--|
+| **Annual cost** | ₹1,85,000 | ₹2,50,000 |
+| **QALYs** | 6.2 | 5.8 |
+
+**Incremental:** Saves ₹65,000 and gains 0.4 QALYs
+
+::: {.callout-tip}
+**Result: DOMINANT** (SE quadrant). Less costly AND more effective. No threshold comparison needed — **strong case for adoption**, subject to feasibility and equity considerations.
+:::
+
+---
+
+## Common Interpretation Pitfalls
+
+::: {.incremental}
+
+1. **"Positive ICER = cost-effective"** — Wrong. Must compare to threshold.
+
+2. **"NW quadrant, low ICER — adopt it"** — Wrong. NW = dominated. No CE basis for adoption.
+
+3. **"Base-case below threshold → done"** — Wrong. Must check PSA uncertainty.
+
+4. **"Negative ICER = bad"** — Wrong. Could be dominant (SE) or a SW trade-off.
+
+5. **"Saves money, so adopt"** (SW) — Wrong. Must check if QALY loss is acceptable.
+
+:::
+
+---
+
+## HTA Interpretation Checklist
+
+**1. Base-Case Results**
+
+- Calculate incremental costs and effects
+- Determine CE plane quadrant
+- Calculate ICER (if NE or SW)
+- Compare to WTP threshold
+
+**2. Uncertainty**
+
+- Review PSA scatter and CEAC
+- Identify key drivers (tornado)
+- Assess probability of cost-effectiveness
+
+**3. Context**
+
+- Are costs relevant to Indian setting?
+- Assess budget impact and affordability
+- Consider equity and access
+
+---
+
+## Final Interpretation
+
+HTA decisions combine:
+
+* Cost-effectiveness (NMB)
+* Uncertainty (CEAC)
+* Drivers (tornado)
+* Research value (EVPI/EVPPI)
+* Affordability (budget impact)
+
+**ICER is a statistic.**
+**HTA is a deliberative decision** — informed by evidence, shaped by values, equity, and context.
+
+---
+
+## Thank You
+
+::: {.columns}
+::: {.column width="60%"}
+Regional Resource Centre for Health Technology Assessment (RRC-HTA)
+
+All India Institute of Medical Sciences (AIIMS), Bhopal
+
+Email: [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)
+:::
+
+::: {.column width="40%"}
+**Continue learning:**
+
+- [Interactive Session](session.html)
+- [Practice Cases](practice.html)
+- [Resources](resources.html)
+:::
+:::

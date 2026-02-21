@@ -1,0 +1,38 @@
+---
+title: "Interpretation of Economic Evaluation Results in HTA"
+subtitle: "HTA Workshop | IGGMC Nagpur | February 24-25, 2026"
+---
+
+This website accompanies the workshop session on interpreting economic evaluation results, delivered at IGGMC Nagpur by RRC-HTA, AIIMS Bhopal.
+
+## Session Materials
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+**[Interactive Session](session.html)** — Live ICER calculator, CE plane with PSA, CEAC, tornado diagram, EVPI, budget impact, case study, and interpretation exercises.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+**[Presentation Slides](slides.html)** — Reveal.js slide deck covering all session topics in full-screen presentation format.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+**[Practice Cases](practice.html)** — Indian HTA case studies (ROTAVAC, PCV13, Cy-Tb) with worked solutions.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+**[Resources](resources.html)** — HTAIn network links, recommended readings, and reference guidelines.
+:::
+:::
+
+---
+
+## Getting Started
+
+1. **Before the session** — Review the [slides](slides.html)
+2. **During the session** — Follow along with the [interactive tools](session.html)
+3. **After the session** — Work through the [practice cases](practice.html)
+
+---
+
+**Contact:** [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in) | [About](about.html)

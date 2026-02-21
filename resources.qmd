@@ -1,0 +1,257 @@
+---
+title: "Resources & Downloads"
+format:
+  html:
+    theme: cosmo
+    toc: true
+---
+
+
+## 🎓 Recommended Reading & Learning
+
+### Essential Textbooks
+
+**1. Methods for Economic Evaluation of Health Care Programmes**
+- Drummond MF, Sculpher MJ, Claxton K, et al. (2015). 4th Edition
+- Oxford University Press
+- Standard reference for HTA methodology
+
+**2. Introduction to Health Economics**
+- Bhattacharya J, Hyde T, Tu P (2014). 2nd Edition
+- Comprehensive overview of health economics principles
+
+**3. Health Technology Assessment: A Practical Guide**
+- Banta D (2009)
+- WHO publication with practical applications
+
+---
+
+## 🔗 Key Indian Resources
+
+### HTAIn (Health Technology Assessment in India) Network
+
+**Main Portal**: [https://htain.dhr.gov.in/index.php](https://htain.dhr.gov.in/index.php)
+
+HTAIn provides comprehensive resources including:
+- **Resources Tab** (What We Do section): Methodologies, toolkits, and guidelines
+  - HTA methodology documents
+  - Cost-effectiveness analysis guidelines
+  - Quality of life assessment tools
+  - Economic evaluation templates
+- HTA research databases
+- Training materials
+- Policy briefs
+
+**Contact**: Connect through the HTAIn portal for additional resources
+
+---
+
+### Post Graduate Institute of Medical Education & Research (PGIMER)
+
+**Health Economics Course Portal**: [https://www.healtheconomics.pgisph.in](https://www.healtheconomics.pgisph.in)
+
+PGIMER offers:
+- Online health economics courses
+- Certificate programs in HTA
+- Free educational materials
+- Video lectures on economic evaluation
+- Interactive learning modules
+- Regular workshops and webinars
+
+**Highly Recommended** for additional self-paced learning
+
+---
+
+### Regional Resource Centres for HTA (RRC-HTA)
+
+**AIIMS Bhopal - RRC-HTA**
+- **Email**: [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)
+- Focus: Chronic kidney disease, portable dialysis, renal care
+- Conducts HTA workshops and training
+- Collaborates on national HTA projects
+
+**Other RRC-HTA Sites**:
+- ICMR-NITVAR, Pune (national coordination)
+- ICMR-NIRRCH, Mumbai
+- AFMC, Pune
+- PGIMER, Chandigarh
+- KSSSS Cancer Institute, Lucknow
+
+---
+
+## 📹 Video Resources
+
+### Interpretation & Application
+
+**YouTube: CE Plane Interpretation for Policy Makers**
+[Watch on YouTube](https://youtu.be/6o9XAqgZH8k?si=hC4WowtRG5O25Zjr)
+- Practical guide to understanding quadrants
+- Real examples from HTA studies
+- Policy decision-making process
+- Duration: ~15 minutes
+
+### PGIMER Online Courses
+- Health economics fundamentals (YouTube channel)
+- Markov modeling tutorials
+- Cost-effectiveness analysis practical sessions
+
+---
+
+## 💻 Software & Tools
+
+### Free Statistical Software for HTA
+
+**R Packages** (CRAN)
+- `heemod` - Markov models and health economic evaluation
+  ```r
+  install.packages("heemod")
+  ```
+- `dampack` - Decision-analytic modeling with PSA
+  ```r
+  install.packages("dampack")
+  ```
+- `hesim` - Health economic simulation in R
+  ```r
+  install.packages("hesim")
+  ```
+- `BCEA` - Bayesian cost-effectiveness analysis
+  ```r
+  install.packages("BCEA")
+  ```
+
+**Python Libraries**
+- `numpy` - Numerical computations
+- `pandas` - Data manipulation
+- `scipy` - Statistical functions
+- `matplotlib` - Visualization
+
+### Online HTA Platforms
+
+**WHO-CHOICE** (Cost-Effectiveness Analysis)
+- Website: [https://www.who.int/teams/health-systems-governance-and-financing/economic-analysis/cost-effectiveness-analysis](https://www.who.int/teams/health-systems-governance-and-financing/economic-analysis/cost-effectiveness-analysis)
+- Global database of CE analyses
+- Methodological guidance
+
+**Tufts Medical Center Cost-Effectiveness Analysis Registry**
+- Website: [https://research.tuftsmedicalcenter.org/cear](https://research.tuftsmedicalcenter.org/cear)
+- Large repository of CE studies
+- Methodological standards
+
+---
+
+## 🌐 International Guidelines & Standards
+
+### ISPOR (International Society For Pharmacoeconomics and Outcomes Research)
+
+**Good Research Practices in HTA**
+- Website: [https://www.ispor.org/heor-resources/good-practices](https://www.ispor.org/heor-resources/good-practices)
+- Webinars and training materials
+- Industry standards and guidelines
+- Regional chapters and events
+
+### NICE (National Institute for Health and Care Excellence)
+
+**Appraisal Process & Guidelines**
+- Website: [https://www.nice.org.uk/process/pmg9](https://www.nice.org.uk/process/pmg9)
+- NICE Guide to the Processes of Technology Appraisal (PMG9)
+- Health economic methods guidance
+- Case studies and examples
+
+### CHEERS Guidelines
+
+**Consolidated Health Economic Evaluation Reporting Standards (2022)**
+- Publication: *Value in Health*, 25(1):3-9
+- Standardized reporting for economic evaluations
+- Essential for manuscript preparation
+- Checklist available at [https://www.equator-network.org/reporting-guidelines/cheers/](https://www.equator-network.org/reporting-guidelines/cheers/)
+
+---
+
+## 📊 Key Research Databases
+
+### PubMed/MEDLINE
+- Search terms: "cost-effectiveness analysis", "health technology assessment", "ICER"
+- Filter by: India studies, recent publications
+- Link: [https://pubmed.ncbi.nlm.nih.gov/](https://pubmed.ncbi.nlm.nih.gov/)
+
+### Google Scholar
+- Specialized search for Indian HTA studies
+- Citation tracking for influential papers
+- Link: [https://scholar.google.com/](https://scholar.google.com/)
+
+### WHO Library Database (WHOLIS)
+- WHO publications on health economics
+- Link: [https://search.who.int/](https://search.who.int/)
+
+---
+
+## 📚 Recommended Journal Articles
+
+### Foundational Papers on HTA in India
+
+**Health Technology Assessment Context**
+1. Prinja S, Gupta M, Verma R, Bahuguna P, Kumar R. (2020). Impact of typhoid conjugate vaccine introduction on health service utilization and costs in India. *BMJ Global Health*, 5(9):e003262.
+
+2. Prinja S, Guleria R, Enns H, et al. (2017). Cost-effectiveness of pneumococcal conjugate vaccination strategies in India. *PLoS ONE*, 12(6):e0180461.
+
+3. Reddy KS, Rao MG, Prabhakar AK. (2016). Health systems strengthening through economic evaluation. *Indian Journal of Public Health*, 60(3):179.
+
+**ICER Interpretation**
+4. Husereau D, Drummond M, Petrou S, et al. (2022). Consolidated Health Economic Evaluation Reporting Standards 2022 statement. *Value in Health*, 25(1):3-9.
+
+---
+
+## 🎯 Learning Pathways
+
+### For Beginners
+1. Start with PGIMER online course basics
+2. Watch the YouTube CE Plane video
+3. Use the interactive ICER calculator
+4. Complete practice cases in the session
+
+### For Intermediate Users
+1. Review NICE PMG9 methodology guide
+2. Study HTAIn resources and toolkits
+3. Explore international CE registries
+4. Read key Indian HTA papers
+
+### For Advanced Users
+1. Access HTAIn research databases
+2. Study CHEERS reporting standards
+3. Engage with RRC-HTA for collaborations
+4. Participate in HTAIn network activities
+
+---
+
+## 📧 Institutional Contacts
+
+### Regional Resource Centre for HTA - AIIMS Bhopal
+- **Email**: [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)
+- **Principal Investigator**: Prof. Dr. Abhijit P. Pakhare
+- **Department**: Community and Family Medicine, AIIMS Bhopal
+
+
+### Workshop Coordination
+For questions about this session or future workshops:
+- Email: [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)
+- Reference: IGGMC Nagpur HTA Workshop, February 24-25, 2026
+
+---
+
+## 🔗 Quick Links Summary
+
+| Resource | Link |
+|----------|------|
+| **HTAIn Portal** | [https://htain.dhr.gov.in/index.php](https://htain.dhr.gov.in/index.php) |
+| **PGIMER Health Economics** | [https://www.healtheconomics.pgisph.in](https://www.healtheconomics.pgisph.in) |
+| **YouTube: CE Plane Video** | [https://youtu.be/6o9XAqgZH8k?si=hC4WowtRG5O25Zjr](https://youtu.be/6o9XAqgZH8k?si=hC4WowtRG5O25Zjr) |
+| **NICE Methods Guide** | [https://www.nice.org.uk/process/pmg9](https://www.nice.org.uk/process/pmg9) |
+| **WHO-CHOICE** | [https://www.who.int/teams/health-systems-governance-and-financing/economic-analysis/cost-effectiveness-analysis](https://www.who.int/teams/health-systems-governance-and-financing/economic-analysis/cost-effectiveness-analysis) |
+| **ISPOR** | [https://www.ispor.org/heor-resources/good-practices](https://www.ispor.org/heor-resources/good-practices) |
+| **Tufts CEAR** | [https://research.tuftsmedicalcenter.org/cear](https://research.tuftsmedicalcenter.org/cear) |
+| **PubMed** | [https://pubmed.ncbi.nlm.nih.gov/](https://pubmed.ncbi.nlm.nih.gov/) |
+
+---
+
+**Last Updated**: February 2026  
+**Contact**: [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)
