@@ -66,16 +66,9 @@ PGIMER offers:
 
 **AIIMS Bhopal - RRC-HTA**
 - **Email**: [hta@aiimsbhopal.edu.in](mailto:hta@aiimsbhopal.edu.in)
-- Focus: Chronic kidney disease, portable dialysis, renal care
 - Conducts HTA workshops and training
 - Collaborates on national HTA projects
 
-**Other RRC-HTA Sites**:
-- ICMR-NITVAR, Pune (national coordination)
-- ICMR-NIRRCH, Mumbai
-- AFMC, Pune
-- PGIMER, Chandigarh
-- KSSSS Cancer Institute, Lucknow
 
 ---
 
